@@ -62,22 +62,22 @@ class Select extends PureComponent {
       getComputedStyleValue: this.getComputedStyleValue,
       setStyle: this.setStyle,
       //create2dRenderingContext: this.create2dRenderingContext,
-      //setMenuElStyle: this.setMenuElStyle,
-      //setMenuElAttr: this.setMenuElAttr,
-      //rmMenuElAttr: this.rmMenuElAttr,
-      //getMenuElOffsetHeight: this.getMenuElOffsetHeight,
-      //getOffsetTopForOptionAtIndex: this.getOffsetTopForOptionAtIndex,
-      //openMenu: this.openMenu,
-      //isMenuOpen: this.isMenuOpen,
-      //setSelectedTextContent: this.setSelectedTextContent,
-      //getNumberOfOptions: this.getNumberOfOptions,
-      //getTextForOptionAtIndex: this.getTextForOptionAtIndex,
-      //getValueForOptionAtIndex: this.getValueForOptionAtIndex,
-      //setAttrForOptionAtIndex: this.setAttrForOptionAtIndex,
-      //rmAttrForOptionAtIndex: this.rmAttrForOptionAtIndex,
-      //registerMenuInteractionHandler: this.registerMenuInteractionHandler,
-      //deregisterMenuInteractionHandler: this.deregisterMenuInteractionHandler,
-      //getWindowInnerHeight: this.getWindowInnerHeight,
+      setMenuElStyle: this.setMenuElStyle,
+      setMenuElAttr: this.setMenuElAttr,
+      rmMenuElAttr: this.rmMenuElAttr,
+      getMenuElOffsetHeight: this.getMenuElOffsetHeight,
+      getOffsetTopForOptionAtIndex: this.getOffsetTopForOptionAtIndex,
+      openMenu: this.openMenu,
+      isMenuOpen: this.isMenuOpen,
+      setSelectedTextContent: this.setSelectedTextContent,
+      getNumberOfOptions: this.getNumberOfOptions,
+      getTextForOptionAtIndex: this.getTextForOptionAtIndex,
+      getValueForOptionAtIndex: this.getValueForOptionAtIndex,
+      setAttrForOptionAtIndex: this.setAttrForOptionAtIndex,
+      rmAttrForOptionAtIndex: this.rmAttrForOptionAtIndex,
+      registerMenuInteractionHandler: this.registerMenuInteractionHandler,
+      deregisterMenuInteractionHandler: this.deregisterMenuInteractionHandler,
+      getWindowInnerHeight: this.getWindowInnerHeight,
     });
   }
 
@@ -160,28 +160,31 @@ class Select extends PureComponent {
   }
 
   create2dRenderingContext() {
-    return {
-      font: '',
-      measureText: (string) => ({
-        width: 0,
-      }),
-    };
+    return document.createElement('canvas').getContext('2d');
   }
 
-  setMenuElStyle(propertyName) {
-    //
+  setMenuElStyle(propertyName, value) {
+    if (this.refs.menu) {
+      this.refs.menu.style.setProperty(propertyName, value);
+    }
   }
 
   setMenuElAttr(attr, value) {
-    //
+    if (this.refs.menu) {
+      this.refs.menu.setAttribute(attr, value);
+    }
   }
 
   rmMenuElAttr(attr) {
-    //
+    if (this.refs.menu) {
+      this.refs.menu.removeAttribute(attr);
+    }
   }
 
   getMenuElOffsetHeight() {
-    return 0;
+    if (this.refs.menu) {
+      return this.refs.menu.offsetHeight;
+    }
   }
 
   getOffsetTopForOptionAtIndex(index) {

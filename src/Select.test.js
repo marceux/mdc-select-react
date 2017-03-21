@@ -99,4 +99,34 @@ describe('<Select />', () => {
       expect(instance.getComputedStyleValue('width')).toEqual('200px');
     });
   });
+
+  describe('- setMenuElStyle', () => {
+    it('sets the css property, propertyName, to a value on the menu element', () => {
+      instance.setMenuElStyle('width', '300px');
+
+      const DOMNode = component.ref('menu').getDOMNode();
+
+      expect(DOMNode.style.width).toEqual('300px');
+    });
+  });
+
+  describe('- setMenuElAttr', () => {
+    it('sets an attribute with value on the menu element', () => {
+      instance.setMenuElAttr('height', '300px');
+
+      const DOMNode = component.ref('menu').getDOMNode();
+
+      expect(DOMNode.getAttribute('height')).toEqual('300px');
+    });
+  });
+
+  describe('- rmMenuElAttr', () => {
+    it('removes an attribute from the menu element', () => {
+      instance.rmMenuElAttr('height');
+
+      const DOMNode = component.ref('menu').getDOMNode();
+
+      expect(DOMNode.getAttribute('height')).toEqual(null);
+    });
+  });
 });
