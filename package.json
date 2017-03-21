@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
+    "@kadira/storybook": "^2.21.0",
     "enzyme": "^2.7.1",
     "eslint": "^3.18.0",
     "eslint-config-airbnb": "^14.1.0",
@@ -12,7 +13,7 @@
     "jest-enzyme": "^2.1.2",
     "react-addons-test-utils": "^15.4.2",
     "react-scripts": "0.9.5",
-    "@kadira/storybook": "^2.21.0"
+    "sinon": "^2.1.0"
   },
   "dependencies": {
     "material-components-web": "^0.7.0",
