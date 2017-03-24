@@ -199,12 +199,12 @@ class SimpleMenu extends PureComponent {
     return this.rootNode.removeEventListener(type, handler);
   }
 
-  registerDocumentClickHandler(type, handler) {
-    return document.addEventListener(type, handler);
+  registerDocumentClickHandler(handler) {
+    return document.addEventListener('click', handler);
   }
 
-  deregisterDocumentClickHandler(type, handler) {
-    return document.removeEventListener(type, handler);
+  deregisterDocumentClickHandler(handler) {
+    return document.removeEventListener('click', handler);
   }
 
   getYParamsForItemAtIndex(index) {
