@@ -1,5 +1,6 @@
 import React from 'react';
-import { storiesOf } from '@kadira/storybook';
+import { storiesOf, action } from '@kadira/storybook';
+
 import Select from '../Select';
 
 const options = [
@@ -9,7 +10,17 @@ const options = [
   { id: 'grape', label: 'Grape', value: 'grape' },
 ];
 
+const props = {
+  options,
+  onBlur: action('Blur'),
+  onChange: action('Change'),
+  onFocus: action('Focus'),
+};
+
 storiesOf('Select', module)
-  .add('with default options', () => (
-    <Select options={options} placeholder="Select a Fruit" />
+  .add('default', () => (
+    <Select {...props} />
+  ))
+  .add('with placeholder', () => (
+    <Select {...props} placeholder="Testing" />
   ));
