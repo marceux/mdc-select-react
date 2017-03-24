@@ -5,22 +5,10 @@ import sinon from 'sinon';
 import SimpleMenu from './SimpleMenu';
 
 describe('<SimpleMenu />', () => {
-  let animationSpy;
   let component;
   let instance;
   let options;
   let props;
-
-  beforeAll(() => {
-    if (!global.window.requestAnimationFrame) {
-      global.window.requestAnimationFrame = sinon.spy();
-    } else {
-      animationSpy = sinon.spy(global.window, 'requestAnimtionFrame');
-    }
-
-    // We are going to "spy" on requestAnimationFrame to avoid errors
-    global['window']['requestAnimationFrame'] = sinon.spy();
-  });
 
   beforeEach(() => {
     options = [
@@ -43,10 +31,9 @@ describe('<SimpleMenu />', () => {
     instance = component.instance();
   });
 
-  afterAll(() => {
-    if (animationSpy) {
-      animationSpy.restore();
-    }
+  it('sets the appropriate refs after render', () => {
+    expect(instance.rootNode).toBeDefined();
+    expect(instance.listNode).toBeDefined();
   });
 
   it('accepts a collection to render its options', () => {
@@ -124,31 +111,5 @@ describe('<SimpleMenu />', () => {
     // Restore the spies!
     closeSpy.restore();
     openSpy.restore();
-  });
-
-  describe('- MDCSimpleMenuFoundation', () => {
-    let foundation;
-
-    beforeEach(() => {
-      foundation = instance.foundation;
-    });
-
-    it('has an adapter whose properties are methods belonging to the component', () => {
-      const adapter = foundation.adapter_;
-
-      const adapterMethods = [
-        'addClass', 'removeClass', 'hasClass', 'hasNecessaryDom',
-        'getInnerDimensions', 'hasAnchor', 'getAnchorDimensions', 'getWindowDimensions',
-        'setScale', 'setInnerScale', 'getNumberOfItems',
-        'registerInteractionHandler', 'deregisterInteractionHandler',
-        'registerDocumentClickHandler', 'deregisterDocumentClickHandler',
-        'getYParamsForItemAtIndex', 'setTransitionDelayForItemAtIndex', 'getIndexForEventTarget',
-        'notifySelected', 'notifyCancel', 'saveFocus', 'restoreFocus', 'isFocused', 'focus',
-        'getFocusedItemIndex', 'focusItemAtIndex', 'isRtl',
-        'setTransformOrigin', 'setPosition', 'getAccurateTime',
-      ];
-
-      adapterMethods.forEach(method => expect(instance[method]).toEqual(adapter[method]));
-    });
   });
 });
