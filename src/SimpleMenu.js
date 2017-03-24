@@ -7,17 +7,8 @@ import SimpleMenuOption from './SimpleMenuOption';
 import '@material/list/dist/mdc.list.css';
 import '@material/menu/dist/mdc.menu.css';
 
-let storedTransformPropertyName;
-
-function getTransformPropertyName(globalObj, forceRefresh = false) {
-  if (storedTransformPropertyName === undefined || forceRefresh) {
-    const el = globalObj.document.createElement('div');
-    const transformPropertyName = ('transform' in el.style ? 'transform' : 'webkitTransform');
-    storedTransformPropertyName = transformPropertyName;
-  }
-
-  return storedTransformPropertyName;
-}
+// Util
+import getTransformPropertyName from './utils/getTransformPropertyName';
 
 class SimpleMenu extends PureComponent {
   constructor(props) {
