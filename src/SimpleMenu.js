@@ -1,9 +1,12 @@
 import React, { PureComponent, PropTypes } from 'react';
 
+// Foundation
 import { MDCSimpleMenuFoundation } from '@material/menu/dist/mdc.menu';
 
+// Component
 import SimpleMenuOption from './SimpleMenuOption';
 
+// Styles
 import '@material/list/dist/mdc.list.css';
 import '@material/menu/dist/mdc.menu.css';
 
@@ -17,7 +20,7 @@ class SimpleMenu extends PureComponent {
     // Object that contains our option nodes
     this.optionNodes = [];
 
-    // Bind Methods
+    // Adapter-Related Methods
     this.addClass = this.addClass.bind(this);
     this.removeClass = this.removeClass.bind(this);
     this.hasClass = this.hasClass.bind(this);
@@ -49,6 +52,7 @@ class SimpleMenu extends PureComponent {
     this.setPosition = this.setPosition.bind(this);
     this.getAccurateTime = this.getAccurateTime.bind(this);
 
+    // General Methods
     this.getOptionNodes = this.getOptionNodes.bind(this);
     this.setRootRef = this.setRootRef.bind(this);
     this.setListRef = this.setListRef.bind(this);
