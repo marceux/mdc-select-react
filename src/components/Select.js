@@ -1,3 +1,4 @@
+import { isEmpty } from 'lodash';
 import React, { PureComponent, PropTypes } from 'react';
 
 // Foundation
@@ -16,9 +17,12 @@ class Select extends PureComponent {
   constructor(props) {
     super(props);
 
+    this.defaultText = 'Select...';
+
     this.state = {
       open: false,
-      selectedText: props.placeholder || 'Select...',
+      selectedText: props.placeholder || this.defaultText,
+      disabled: props.disabled || false,
     };
 
     // Method Binding
@@ -34,14 +38,50 @@ class Select extends PureComponent {
 
   componentDidMount() {
     this.foundation.init();
+
+    // If the state is disabled, setDisabled at the foundation level
+    if (this.state.disabled) {
+      this.foundation.setDisabled(Boolean(this.state.disabled));
+    }
   }
 
   componentWillUnmount() {
     this.foundation.destroy();
   }
 
+  componentWillReceiveProps(nextProps) {
+    const { disabled, placeholder } = nextProps;
+
+    // Set empty state object
+    const newState = {};
+
+    // If we changed the placeholder
+    if (this.props.placeholder !== placeholder) {
+      // If the current value is 'undefined' then use OUR placeholder for text
+      if (this.state.value === undefined) {
+        newState.selectedText = placeholder;
+      }
+    }
+
+    // If our disabled prop changed, then set the newState disabled as a boolean value
+    if (this.props.disabled !== disabled) {
+      newState.disabled = Boolean(disabled);
+    }
+
+    // If our new state is NOT empty, then set it, if it is, just end
+    if (!isEmpty(newState)) {
+      this.setState(newState);
+    }
+  }
+
   componentDidUpdate(prevProps, prevState) {
-    const { onChange } = this.props;
+    const { disabled, onChange } = this.props;
+
+    // If the disabled props changed, then we call the foundation to
+    // set the disabled state
+    if (prevProps.disabled !== disabled) {
+      this.foundation.setDisabled(disabled);
+    }
 
     // If the value changed, then we fire an onChange function if provided
     if (prevState.value !== this.state.value) {
@@ -90,16 +130,16 @@ class Select extends PureComponent {
 
   render() {
     const { options } = this.props;
-    const { focusIndex, open, selectedText } = this.state;
+    const { disabled, focusIndex, open, selectedText } = this.state;
 
     return (
       <div
         className="mdc-select"
         ref={this.setRootRef}
         role="listbox"
-        tabIndex="0"
         onFocus={this.handleFocus}
         onBlur={this.handleBlur}
+        tabIndex={(disabled) ? '-1' : '0'}
       >
         <span className="mdc-select__selected-text">{selectedText}</span>
         <SimpleMenu

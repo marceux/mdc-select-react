@@ -1,3 +1,5 @@
+import { find, isEmpty } from 'lodash';
+
 /**
  * Adapter-generating function.
  *
@@ -44,15 +46,21 @@ function selectAdapter(component) {
   }
 
   function makeTabbable() {
-    component.setState({ tabbable: true });
+    // If our state is disabled...
+    if (component.state.disabled) {
+      component.setState({ disabled: false });
+    }
   }
 
   function makeUntabbable() {
-    component.setState({ tabbable: false });
+    // If our state is NOT disabled...
+    if (!component.state.disabled) {
+      component.setState({ disabled: true });
+    }
   }
 
   function getComputedStyleValue(propertyName) {
-    return window.getComputedStyle(component.rootNode)[propertyName];
+    return window.getComputedStyle(component.rootNode).getPropertyValue(propertyName);
   }
 
   function setStyle(propertyName, value) {
@@ -94,11 +102,26 @@ function selectAdapter(component) {
     return component.state.open;
   }
 
-  function setSelectedTextContent(selectedText) {
-    // We need to get the value from the option by its label ("selectedText")
-    const { value } = find(component.props.options, ['label', selectedText]);
+  function setSelectedTextContent(optionText) {
+    let selectedText;
+    let value;
 
-    component.setState({ open: false, selectedText, value });
+    // We have to check if the option text is empty or falsy
+    if (!optionText || isEmpty(optionText)) {
+      // access the placeholder if there is one, or use default text
+      selectedText = component.props.placeholder || component.defaultText;
+      value = undefined;
+    } else {
+      selectedText = optionText;
+      // We need to get the value from the option by its label ("selectedText")
+      value = find(component.props.options, ['label', selectedText]).value;
+    }
+
+    component.setState({
+      open: false,
+      selectedText,
+      value,
+    });
   }
 
   function getNumberOfOptions() {

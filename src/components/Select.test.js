@@ -5,27 +5,25 @@ import Select from './Select';
 
 describe('<Select />', () => {
   let component;
-  let infoStub;
   let instance;
   let onBlur;
   let onChange;
   let onFocus;
   let options;
   let props;
-  let stub;
-  let stub2;
+
+  // Stubs
+  let getContextStub;
 
   beforeAll(() => {
-    // Hack because the console.info for sinon is STUPID
-    infoStub = sinon.stub(console, 'info', () => {});
+    // We need to stub the canvas element and return the object
+    // expected by the foundation
+    getContextStub = sinon.stub(HTMLCanvasElement.prototype, 'getContext');
 
-    // We have to stub the 2d rendering context call because it uses `document` global
-    stub = sinon.stub(Select.prototype, 'create2dRenderingContext', () => ({
+    getContextStub.returns({
       font: '',
-      measureText: () => ({width: 0}),
-    }));
-
-    stub2 = sinon.stub(Select.prototype, 'openMenu', () => ({}));
+      measureText: () => ({ width: 0 }),
+    });
   });
 
   beforeEach(() => {
@@ -56,11 +54,7 @@ describe('<Select />', () => {
   });
 
   afterAll(() => {
-    // Restore the stub after all the tests are done
-    stub.restore();
-    stub2.restore();
-
-    infoStub.restore();
+    getContextStub.restore();
   });
 
   it('allows for default selected text via props', () => {
@@ -73,103 +67,110 @@ describe('<Select />', () => {
     expect(component).toHaveState('selectedText', 'Select a Fruit');
   });
 
-  it('has the appropriate refs', () => {
+  it('sets the appropriate refs after render', () => {
     expect(instance.rootNode).toBeDefined();
     expect(instance.menuNode).toBeDefined();
+    expect(instance.optionNodes).toBeDefined();
   });
 
-  describe('- MDCSelectFoundation', () => {
-    let foundation;
-    let rootComponent;
-    let rootNode;
+  it('closes the menu when the menu node receives a cancel event', () => {
+    const { rootNode } = instance;
 
-    beforeEach(() => {
-      // Get the root component
-      rootComponent = component.find('.mdc-select');
+    // Create and dispatch a cancel event
+    const closeEvent = new CustomEvent('MDCSimpleMenu:cancel');
+    rootNode.dispatchEvent(closeEvent);
 
-      // Get the dom node for the root component
-      rootNode = instance.rootNode;
+    expect(component).toHaveState('open', false);
+  });
 
-      foundation = instance.foundation;
-    });
+  it('calls the onBlur handler on blur events and when it is closed', () => {
+    // We start off with 0 onBlur calls
+    expect(onBlur.called).toEqual(false);
 
-    it('has an adapter whose properties are methods belonging to the component', () => {
-      const adapter = foundation.adapter_;
+    // Set state to open, then dispatch blur
+    component.setState({ open: true });
+    component.find('.mdc-select').simulate('blur');
+    expect(onBlur.called).toEqual(false);
 
-      const adapterMethods = [
-        'addClass', 'removeClass', 'setAttr', 'rmAttr', 'computeBoundingRect',
-        'registerInteractionHandler', 'deregisterInteractionHandler', 'focus', 'makeTabbable', 'makeUntabbable',
-        'getComputedStyleValue', 'setStyle', 'create2dRenderingContext', 'setMenuElStyle', 'setMenuElAttr',
-        'rmMenuElAttr', 'getMenuElOffsetHeight', 'getOffsetTopForOptionAtIndex', 'openMenu', 'isMenuOpen',
-        'setSelectedTextContent', 'getNumberOfOptions', 'getTextForOptionAtIndex',
-        'getValueForOptionAtIndex', 'setAttrForOptionAtIndex', 'rmAttrForOptionAtIndex',
-        'registerMenuInteractionHandler', 'deregisterMenuInteractionHandler', 'getWindowInnerHeight',
-      ];
+    // Set state to close, then dispatch blur
+    component.setState({ open: false });
+    component.find('.mdc-select').simulate('blur');
+    expect(onBlur.called).toEqual(true);
+  });
 
-      adapterMethods.forEach(method => expect(instance[method]).toEqual(adapter[method]));
-    });
+  it('calls the onChange handler only if the `value` state changes', () => {
+    expect(onChange.called).toEqual(false);
 
-    it('opens and closes the component', () => {
-      // Open the select
-      foundation.open_();
+    component.setState({ value: 'banana' });
 
-      expect(rootComponent).toHaveClassName('.mdc-select--open');
+    expect(onChange.called).toEqual(true);
+  });
 
-      // We are going to spy on the focus method
-      const spy = sinon.spy(rootNode, 'focus');
+  it('calls the onFocus handler on focus events and when it is closed', () => {
+    // We start off with 0 onFocus calls
+    expect(onFocus.called).toEqual(false);
 
-      // Close the select
-      foundation.close_();
+    // Set state to open, then dispatch blur
+    component.setState({ open: true });
+    component.find('.mdc-select').simulate('focus');
+    expect(onFocus.called).toEqual(false);
 
-      expect(rootComponent).not.toHaveClassName('.mdc-select--open');
-      expect(spy.called).toEqual(true);
+    // Set state to close, then dispatch blur
+    component.setState({ open: false });
+    component.find('.mdc-select').simulate('focus');
+    expect(onFocus.called).toEqual(true);
+  });
 
-      spy.restore();
-    });
+  it('is disabled when a disabled prop is passed', () => {
+    // New props, component, instance
+    props.disabled = true;
+    component = mount(<Select {...props} />);
+    instance = component.instance();
 
-    it('sets/unsets a disabled state', () => {
-      foundation.setDisabled(true);
+    expect(instance.foundation.isDisabled()).toEqual(true);
 
-      expect(rootComponent).toHaveClassName('.mdc-select--disabled');
-      expect(rootNode.getAttribute('tab-index', '-1'));
-      expect(rootNode.getAttribute('aria-disabled')).toEqual('true');
+    component.setProps({ disabled: false });
+    expect(instance.foundation.isDisabled()).toEqual(false);
 
-      foundation.setDisabled(false);
+    component.setProps({ disabled: true });
+    expect(instance.foundation.isDisabled()).toEqual(true);
+  });
 
-      expect(rootComponent).not.toHaveClassName('.mdc-select--disabled');
-      expect(rootNode.getAttribute('tab-index', '0'));
-      expect(rootNode.getAttribute('aria-disabled')).toEqual(null);
-    });
+  it('uses the default text or placeholder if value and label not provided', () => {
+    // Added empty option to the beginning
+    options = [
+      { id: '', label: '', value: '' },
+      ...options,
+    ];
 
-    it('selects an option by index', () => {
-      // Default, we are going to start at -1
-      expect(foundation.selectedIndex_).toEqual(-1);
+    props.options = options;
+    props.placeholder = undefined;
 
-      // We are going to iterate over all the items and check the values
-      options.forEach((option, index) => {
-        // We are going to choose the first index
-        // We are adding '1' because the system automatically adds a default option
-        foundation.setSelectedIndex(index);
+    component = mount(<Select {...props} />);
+    const foundation = component.instance().foundation;
 
-        // get the DOMNode for the option at index 0, and check aria-selected
-        const optionNode = instance.optionNodes[index];
-        expect(optionNode.getAttribute('aria-selected')).toEqual('true');
+    // Set the selected index to the second option
+    foundation.setSelectedIndex(1);
 
-        // Test to see that the selected index changed, and so did label to current option
-        expect(foundation.selectedIndex_).toEqual(index);
-        expect(component).toHaveState('selectedText', option.label);
-      });
-    });
+    // Expect the value to change
+    expect(component).toHaveState('value', 'apple');
+    expect(component).toHaveState('selectedText', 'Apple');
 
-    it('gets the value of the current selected index', () => {
-      // We are going to choose the first index
-      foundation.setSelectedIndex(-1);
+    // Now, select our default bullshit option
+    foundation.setSelectedIndex(0);
 
-      expect(foundation.getValue()).toEqual('');
+    // Expect the value to change
+    expect(component).toHaveState('value', undefined);
+    expect(component).toHaveState('selectedText', 'Select...');
 
-      foundation.setSelectedIndex(0);
+    component.setProps({ placeholder: 'Testing' });
 
-      expect(foundation.getValue()).toEqual('apple');
-    });
+    expect(component).toHaveState('selectedText', 'Testing');
+
+    // Trigger the selection again
+    foundation.setSelectedIndex(1);
+    foundation.setSelectedIndex(0);
+
+    expect(component).toHaveState('selectedText', 'Testing');
   });
 });
