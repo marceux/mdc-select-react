@@ -4,6 +4,7 @@ import { storiesOf, action } from '@kadira/storybook';
 import Select from '../components/Select';
 
 const options = [
+  { id: 'default', label: '', value: '' },
   { id: 'apple', label: 'Apple', value: 'apple' },
   { id: 'orange', label: 'Orange', value: 'orange' },
   { id: 'strawberry', label: 'Strawberry', value: 'strawberry' },
@@ -24,6 +25,6 @@ storiesOf('Select', module)
   .add('with placeholder', () => (
     <Select {...props} placeholder="Testing" />
   ))
-  .add('with default or empty first option', () => (
-    <Select {...props} placeholder="With Default First Option" />
+  .add('disabled is true', () => (
+    <Select {...props} disabled />
   ));
