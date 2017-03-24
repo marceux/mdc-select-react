@@ -7,7 +7,11 @@ describe('<Select />', () => {
   let component;
   let infoStub;
   let instance;
+  let onBlur;
+  let onChange;
+  let onFocus;
   let options;
+  let props;
   let stub;
   let stub2;
 
@@ -32,7 +36,20 @@ describe('<Select />', () => {
       { id: 'grape', label: 'Grape', value: 'grape' },
     ];
 
-    component = mount(<Select options={options} />);
+    onBlur = sinon.spy();
+
+    onChange = sinon.spy();
+
+    onFocus = sinon.spy();
+
+    props = {
+      onBlur,
+      onChange,
+      onFocus,
+      options,
+    };
+
+    component = mount(<Select {...props} />);
 
     // Get the latest instance found in the component
     instance = component.instance();
@@ -59,90 +76,6 @@ describe('<Select />', () => {
   it('has the appropriate refs', () => {
     expect(instance.rootNode).toBeDefined();
     expect(instance.menuNode).toBeDefined();
-  });
-
-  it('accepts a collection to render its options', () => {
-    // Find all of the option elements in the current component
-    const optionEls = component.find('.mdc-list-item');
-
-    // We want to have the same amount of options rendered that we passed
-    expect(optionEls.length).toEqual(options.length + 1);
-
-    // With the children we created in the "beforeAll"
-    options.forEach((option, index) => {
-      // Add one to get current index to account for default
-      const currentIndex = index + 1;
-
-      // Get a specific rendered option
-      const optionEl = optionEls.at(currentIndex);
-
-      // Expect inner text to match label
-      expect(optionEl.text()).toEqual(option.label);
-      expect(optionEl.prop('id')).toEqual(option.id);
-    });
-  });
-
-  it('handles options that are not arrays', () => {
-    // Stubbing console because we don't want any printouts
-    const consoleStub = sinon.stub(console, 'error', () => {});
-
-    // We are providing different types of option args
-    const optionsArgs = [
-      undefined,
-      '1',
-      1,
-      {},
-      [],
-    ];
-
-    optionsArgs.forEach(arg => {
-      component = mount(<Select options={arg} />);
-
-      // Get the new instance
-      instance = component.instance();
-
-      // Test all the times we would actually attempt to access option
-      expect(instance.getNumberOfOptions()).toEqual(1);
-      expect(instance.getTextForOptionAtIndex(0)).toEqual('Select...');
-      expect(instance.getValueForOptionAtIndex(0)).toEqual('');
-      expect(component.find('.mdc-list-item').length).toEqual(1);
-    });
-
-    consoleStub.restore();
-  });
-
-  it('updates options when they change, not when they do not change', () => {
-    let prevOptions = instance.optionNodes;
-
-    // Only returning the first two options this time
-    component.setProps({
-      options: [
-        options[0],
-        options[1],
-      ],
-    });
-
-    expect(component.find('.mdc-list-item').length).toEqual(3);
-    expect(Object.keys(instance.optionNodes).length).toEqual(3);
-
-    // Set options to old options
-    component.setProps({
-      options: options,
-    });
-
-    expect(component.find('.mdc-list-item').length).toEqual(5);
-    expect(Object.keys(instance.optionNodes).length).toEqual(5);
-
-    // Update our prevOptions
-    prevOptions = instance.optionNodes;
-
-    // Changing a prop that is NOT options
-    component.setProps({
-      selectedText: 'Changing',
-    });
-
-    expect(component.find('.mdc-list-item').length).toEqual(5);
-    expect(Object.keys(instance.optionNodes).length).toEqual(5);
   });
 
   describe('- MDCSelectFoundation', () => {
@@ -216,14 +149,14 @@ describe('<Select />', () => {
       options.forEach((option, index) => {
         // We are going to choose the first index
         // We are adding '1' because the system automatically adds a default option
-        foundation.setSelectedIndex(index + 1);
+        foundation.setSelectedIndex(index);
 
         // get the DOMNode for the option at index 0, and check aria-selected
-        const optionNode = instance.optionNodes[option.id];
+        const optionNode = instance.optionNodes[index];
         expect(optionNode.getAttribute('aria-selected')).toEqual('true');
 
         // Test to see that the selected index changed, and so did label to current option
-        expect(foundation.selectedIndex_).toEqual(index + 1);
+        expect(foundation.selectedIndex_).toEqual(index);
         expect(component).toHaveState('selectedText', option.label);
       });
     });
@@ -234,7 +167,7 @@ describe('<Select />', () => {
 
       expect(foundation.getValue()).toEqual('');
 
-      foundation.setSelectedIndex(1);
+      foundation.setSelectedIndex(0);
 
       expect(foundation.getValue()).toEqual('apple');
     });

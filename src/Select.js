@@ -1,11 +1,11 @@
+import { find } from 'lodash';
+
 import React, { PureComponent, PropTypes } from 'react';
-import { Set as ImmutableSet } from 'immutable';
 
 import { MDCSelectFoundation } from '@material/select/dist/mdc.select';
-import { MDCSimpleMenu } from '@material/menu/dist/mdc.menu';
 
-import '@material/list/dist/mdc.list.css';
-import '@material/menu/dist/mdc.menu.css';
+import SimpleMenu from './SimpleMenu';
+
 import '@material/select/dist/mdc.select.css';
 
 class Select extends PureComponent {
@@ -15,12 +15,9 @@ class Select extends PureComponent {
     const { placeholder } = props;
 
     this.state = {
-      classes: new ImmutableSet(),
+      open: false,
       selectedText: placeholder || 'Select...',
     };
-
-    this.optionNodes = {};
-    this.options = [];
 
     // Bind Methods
     this.addClass = this.addClass.bind(this);
@@ -54,11 +51,11 @@ class Select extends PureComponent {
     this.notifyChange = this.notifyChange.bind(this);
     this.getWindowInnerHeight = this.getWindowInnerHeight.bind(this);
 
-    this.getOptionNode = this.getOptionNode.bind(this);
     this.setRootRef = this.setRootRef.bind(this);
     this.setMenuRef = this.setMenuRef.bind(this);
-    this.addOptionRef = this.addOptionRef.bind(this);
-    this.renderOption = this.renderOption.bind(this);
+    this.handleBlur = this.handleBlur.bind(this);
+    this.handleCancel = this.handleCancel.bind(this);
+    this.handleFocus = this.handleFocus.bind(this);
 
     // Finally, create our MDC Select Foundation
     this.foundation = new MDCSelectFoundation({
@@ -96,38 +93,30 @@ class Select extends PureComponent {
   }
 
   componentDidMount() {
-    this.simpleMenu = MDCSimpleMenu.attachTo(this.menuNode);
     this.foundation.init();
   }
 
   componentWillUnmount() {
     this.foundation.destroy();
-    this.simpleMenu = undefined;
   }
 
-  componentWillReceiveProps(nextProps) {
-    // If our options change, reset the optionNodes
-    if (nextProps.options !== this.props.options) {
-      this.optionNodes = {};
-      this.options = [];
+  componentDidUpdate(prevProps, prevState) {
+    const { onChange } = this.props;
+
+    // If the value changed, then we send it up
+    if (prevState.value !== this.state.value) {
+      if (onChange) {
+        onChange(this.state.value);
+      }
     }
   }
 
-  getOptionNode(index) {
-    const { id } = this.options[index];
-    return this.optionNodes[id];
-  }
-
   addClass(className) {
-    this.setState(prevState => ({
-      classes: prevState.classes.add(className),
-    }));
+    this.rootNode.classList.add(className);
   }
 
   removeClass(className) {
-    this.setState(prevState => ({
-      classes: prevState.classes.remove(className),
-    }));
+    this.rootNode.classList.remove(className);
   }
 
   setAttr(attr, value) {
@@ -195,42 +184,45 @@ class Select extends PureComponent {
   }
 
   getOffsetTopForOptionAtIndex(index) {
-    return this.getOptionNode(index).offsetTop;
+    return this.optionNodes[index].offsetTop;
   }
 
   openMenu(focusIndex) {
-    // this.props.onFocus()
-    this.simpleMenu.foundation_.open(focusIndex);
+    this.setState({
+      focusIndex,
+      open: true,
+    });
   }
 
   isMenuOpen() {
-    return this.simpleMenu.foundation_.isOpen();
+    return this.state.open;
   }
 
-  setSelectedTextContent(selectedTextContent) {
-    this.setState(prevState => ({
-      selectedText: selectedTextContent,
-    }));
+  setSelectedTextContent(selectedText) {
+    // We need to get the value from the option by its label ("selectedText")
+    const { value } = find(this.props.options, ['label', selectedText]);
+
+    this.setState({ open: false, selectedText, value });
   }
 
   getNumberOfOptions() {
-    return this.options.length;
+    return this.props.options.length;
   }
 
   getTextForOptionAtIndex(index) {
-    return this.options[index].label;
+    return this.props.options[index].label;
   }
 
   getValueForOptionAtIndex(index) {
-    return this.options[index].value;
+    return this.props.options[index].value;
   }
 
   setAttrForOptionAtIndex(index, attr, value) {
-    this.getOptionNode(index).setAttribute(attr, value);
+    this.optionNodes[index].setAttribute(attr, value);
   }
 
   rmAttrForOptionAtIndex(index, attr) {
-    this.getOptionNode(index).removeAttribute(attr);
+    this.optionNodes[index].removeAttribute(attr);
   }
 
   registerMenuInteractionHandler(type, handler) {
@@ -241,9 +233,7 @@ class Select extends PureComponent {
     this.menuNode.removeEventListener(type, handler);
   }
 
-  notifyChange() {
-    // this.props.onChange()
-  }
+  notifyChange() {}
 
   getWindowInnerHeight() {
     return window.innerHeight;
@@ -253,77 +243,58 @@ class Select extends PureComponent {
     this.rootNode = node;
   }
 
-  setMenuRef(node) {
-    this.menuNode = node;
+  setMenuRef(menuComponent) {
+    // this will be null if the menuComponent is unmounting
+    if (menuComponent === null) {
+      this.menuNode = null;
+      this.optionNodes = null;
+    } else {
+      this.menuNode = menuComponent.rootNode;
+      this.optionNodes = menuComponent.optionNodes;
+    }
   }
 
-  addOptionRef(id) {
-    return (node) => {
-      // If we receive a HTMLElement, add to our
-      // option nodes object, else, delete key
-      if (node) {
-        this.optionNodes[id] = node;
-      } else {
-        delete this.optionNodes[id];
-      }
-    };
+  handleFocus(event) {
+    const { onFocus } = this.props;
+
+    if (!this.isMenuOpen() && onFocus) {
+      onFocus(event);
+    }
   }
 
-  renderOption({ id, label }) {
-    return (
-      <li
-        className="mdc-list-item"
-        id={id}
-        key={id}
-        ref={this.addOptionRef(id)}
-        role="option"
-        tabIndex="0"
-      >
-        {label}
-      </li>
-    );
+  handleBlur(event) {
+    const { onBlur } = this.props;
+
+    if (!this.isMenuOpen() && onBlur) {
+      onBlur(event);
+    }
+  }
+
+  handleCancel() {
+    this.setState({ open: false });
   }
 
   render() {
-    const { options, placeholder } = this.props;
-    const { classes, selectedText } = this.state;
-
-    // Setting the option IDs array
-    const renderedOptions = [];
-
-    // Setting our default option
-    const defaultOption = {
-      id: 'default',
-      label: placeholder || 'Select...',
-      value: '',
-    };
-
-    if (options && Array.isArray(options) && options.length > 0) {
-      // Have our own array of the options
-      this.options = [defaultOption, ...options];
-    } else {
-      this.options = [defaultOption];
-    }
-
-    // Iterate over our class options array
-    this.options.forEach(option => {
-      // Render the option and push to our rendered array
-      renderedOptions.push(this.renderOption(option));
-    });
+    const { options } = this.props;
+    const { focusIndex, open, selectedText } = this.state;
 
     return (
       <div
-        className={`mdc-select ${classes.toJS().join(' ')}`}
+        className="mdc-select"
         ref={this.setRootRef}
         role="listbox"
         tabIndex="0"
+        onFocus={this.handleFocus}
+        onBlur={this.handleBlur}
       >
         <span className="mdc-select__selected-text">{selectedText}</span>
-        <div className="mdc-simple-menu mdc-select__menu" ref={this.setMenuRef}>
-          <ul className="mdc-list mdc-simple-menu__items">
-            {renderedOptions}
-          </ul>
-        </div>
+        <SimpleMenu
+          focusIndex={focusIndex}
+          onCancel={this.handleCancel}
+          open={open}
+          options={options}
+          ref={this.setMenuRef}
+        />
       </div>
     );
   }
@@ -331,6 +302,7 @@ class Select extends PureComponent {
 
 Select.propTypes = {
   options: PropTypes.array.isRequired,
+  placeholder: PropTypes.string,
 };
 
 export default Select;
