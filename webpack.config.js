@@ -10,8 +10,10 @@ module.exports = {
   devtool: 'source-map',
   entry: './src/index.js',
   output: {
-    path: path.join(__dirname, 'build'),
+    path: path.join(__dirname, 'dist'),
     filename: 'index.js',
+    library: 'MDCSelectReact',
+    libraryTarget: 'umd',
   },
   module: {
     loaders: [
@@ -28,7 +30,7 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        loader: 'style-loader!css-loader?modules',
+        loader: 'style-loader!css-loader',
       },
     ],
   },
