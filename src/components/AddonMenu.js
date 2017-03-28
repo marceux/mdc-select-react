@@ -2,7 +2,7 @@
 import AddonMenuFoundation from '../foundations/AddonMenuFoundation';
 
 // Adapter
-import simpleMenuAdapter from '../adapters/simpleMenuAdapter';
+import addonMenuAdapter from '../adapters/addonMenuAdapter';
 
 // Component
 import SimpleMenu from './SimpleMenu';
@@ -12,7 +12,7 @@ class AddonMenu extends SimpleMenu {
     super(props);
 
     // Finally, create our MDC AddonMenu Foundation
-    this.foundation = new AddonMenuFoundation(simpleMenuAdapter(this));
+    this.foundation = new AddonMenuFoundation(addonMenuAdapter(this));
   }
 }
 
