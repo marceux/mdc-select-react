@@ -12,10 +12,10 @@ describe('<SimpleMenu />', () => {
 
   beforeEach(() => {
     options = [
-      { id: 'apple', label: 'Apple', value: 'apple' },
-      { id: 'orange', label: 'Orange', value: 'orange' },
-      { id: 'strawberry', label: 'Strawberry', value: 'strawberry' },
-      { id: 'grape', label: 'Grape', value: 'grape' },
+      { id: 'apple', text: 'Apple', value: 'apple' },
+      { id: 'orange', text: 'Orange', value: 'orange' },
+      { id: 'strawberry', text: 'Strawberry', value: 'strawberry' },
+      { id: 'grape', text: 'Grape', value: 'grape' },
     ];
 
     props = {
@@ -51,8 +51,8 @@ describe('<SimpleMenu />', () => {
       // Get a specific rendered option
       const optionEl = optionEls.at(currentIndex);
 
-      // Expect inner text to match label
-      expect(optionEl.text()).toEqual(option.label);
+      // Expect inner text to match text
+      expect(optionEl.text()).toEqual(option.text);
       expect(optionEl.prop('id')).toEqual(option.id);
     });
   });

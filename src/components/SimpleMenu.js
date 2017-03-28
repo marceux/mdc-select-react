@@ -77,8 +77,8 @@ class SimpleMenu extends PureComponent {
     return [].slice.call(this.rootNode.querySelectorAll('.mdc-list-item'));
   }
 
-  renderOption({ id, label }) {
-    return (<SimpleMenuOption id={id} key={id} label={label} />);
+  renderOption({ id, text }) {
+    return (<SimpleMenuOption id={id} key={id} text={text} />);
   }
 
   render() {
@@ -107,7 +107,7 @@ SimpleMenu.propTypes = {
       PropTypes.string,
       PropTypes.number,
     ]),
-    label: PropTypes.string,
+    text: PropTypes.string,
     value: PropTypes.string,
   })).isRequired,
 };

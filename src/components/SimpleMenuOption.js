@@ -2,7 +2,7 @@ import React, { PropTypes, PureComponent } from 'react';
 
 class SimpleMenuOption extends PureComponent {
   render() {
-    const { id, label } = this.props;
+    const { id, text } = this.props;
 
     return (
       <li
@@ -11,7 +11,7 @@ class SimpleMenuOption extends PureComponent {
         role="option"
         tabIndex="0"
       >
-        {label}
+        {text}
       </li>
     );
   }
@@ -22,7 +22,7 @@ SimpleMenuOption.propTypes = {
     PropTypes.string,
     PropTypes.number,
   ]),
-  label: PropTypes.string,
+  text: PropTypes.string,
 };
 
 export default SimpleMenuOption;
