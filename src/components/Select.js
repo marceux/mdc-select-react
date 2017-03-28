@@ -40,6 +40,7 @@ class Select extends PureComponent {
     this.foundation.init();
 
     // If the state is disabled, setDisabled at the foundation level
+    // using Boolean, because we may not know what the value of disabled is
     if (this.state.disabled) {
       this.foundation.setDisabled(Boolean(this.state.disabled));
     }
@@ -80,7 +81,7 @@ class Select extends PureComponent {
     // If the disabled props changed, then we call the foundation to
     // set the disabled state
     if (prevProps.disabled !== disabled) {
-      this.foundation.setDisabled(disabled);
+      this.foundation.setDisabled(Boolean(disabled));
     }
 
     // If the value changed, then we fire an onChange function if provided
