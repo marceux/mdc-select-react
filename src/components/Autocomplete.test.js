@@ -15,10 +15,10 @@ describe('<Autocomplete />', () => {
 
   beforeEach(() => {
     options = [
-      { id: 'apple', label: 'Apple', value: 'apple' },
-      { id: 'orange', label: 'Orange', value: 'orange' },
-      { id: 'strawberry', label: 'Strawberry', value: 'strawberry' },
-      { id: 'grape', label: 'Grape', value: 'grape' },
+      { id: 'apple', text: 'Apple', value: 'apple' },
+      { id: 'orange', text: 'Orange', value: 'orange' },
+      { id: 'strawberry', text: 'Strawberry', value: 'strawberry' },
+      { id: 'grape', text: 'Grape', value: 'grape' },
     ];
 
     onBlur = sinon.spy();
@@ -40,9 +40,16 @@ describe('<Autocomplete />', () => {
     instance = component.instance();
   });
 
-  it('changes to a focused state on clicks', () => {
-    component.find('.mdac-autocomplete').simulate('click');
+  it('limits menu options by typing in textfield', () => {
+    const menu = component.find('AddonMenu');
+    const textfield = component.find('.mdc-textfield__input');
 
-    expect(component).toHaveState('focused', true);
+    expect(menu.prop('options').length).toEqual(4);
+
+    textfield.simulate('change', { target: { value: 'ap' } });
+    expect(menu.prop('options').length).toEqual(2);
+
+    textfield.simulate('change', { target: { value: 'Gr' } });
+    expect(menu.prop('options').length).toEqual(1);
   });
 });
