@@ -132,11 +132,12 @@ class Textfield extends PureComponent {
   handleBlur(event) {
     const { onBlur, checkValidity } = this.props;
 
+    // Check if checkValidity is provided
     // We are going to call our checkValidate method on the event target value
-    const valid = checkValidity(event.target.value);
-
-    // Update the validity in the state
-    this.setState({ valid });
+    if (checkValidity) {
+      // Update the validity in the state
+      this.setState({ valid: checkValidity(event.target.value) });
+    }
 
     if (onBlur) {
       onBlur(event);
