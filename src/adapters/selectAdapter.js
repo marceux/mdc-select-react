@@ -129,7 +129,7 @@ function selectAdapter(component) {
   }
 
   function getTextForOptionAtIndex(index) {
-    return component.props.options[index].label;
+    return component.props.options[index].text;
   }
 
   function getValueForOptionAtIndex(index) {
