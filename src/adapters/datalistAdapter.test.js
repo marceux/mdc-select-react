@@ -9,10 +9,11 @@ describe('datalistAdapter()', () => {
     const adapterMethods = [
       'addClass', 'removeClass',
       'registerInputEventHandler', 'deregisterInputEventHandler',
-      'registerBtnEventHandler', 'deregisterBtnEventHandler',
+      'registerBtnClickHandler', 'deregisterBtnClickHandler',
       'registerInteractionEventHandler', 'deregisterInteractionEventHandler',
-      'registerDocumentEventHandler', 'deregisterDocumentEventHandler',
-      'isInputFocused', 'matchExists', 'focusOnElementAtIndex',
+      'registerDocumentClickHandler', 'deregisterDocumentClickHandler',
+      'focusOnInput', 'isInputFocused',
+      'matchExists', 'focusOnElementAtIndex',
       'getIndexForEventTarget', 'getNumberOfItems', 'selectItemAtIndex',
       'notifyCancel',
     ];

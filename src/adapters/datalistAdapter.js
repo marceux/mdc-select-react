@@ -19,47 +19,61 @@ function datalistAdapter(component) {
     component.rootNode.classList.remove(className);
   }
 
-  function hasClass(className) {
-    return component.rootNode.classList.contains(className);
-  }
-
   function registerInputEventHandler(type, handler) {
-    return component.rootNode.addEventListener(type, handler);
+    return component.inputNode.addEventListener(type, handler);
   }
 
   function deregisterInputEventHandler(type, handler) {
-    return component.rootNode.removeEventListener(type, handler);
+    return component.inputNode.removeEventListener(type, handler);
   }
 
-  function registerBtnEventHandler(type, handler) {
-    return component.rootNode.addEventListener(type, handler);
+  function registerBtnClickHandler(handler) {
+    return component.btnNode.addEventListener('click', handler);
   }
 
-  function deregisterBtnEventHandler(type, handler) {
-    return component.rootNode.removeEventListener(type, handler);
+  function deregisterBtnClickHandler(handler) {
+    return component.btnNode.removeEventListener('click', handler);
   }
 
   function registerInteractionEventHandler(type, handler) {
-    return component.rootNode.addEventListener(type, handler);
+    return component.listNode.addEventListener(type, handler);
   }
 
   function deregisterInteractionEventHandler(type, handler) {
-    return component.rootNode.removeEventListener(type, handler);
+    return component.listNode.removeEventListener(type, handler);
   }
 
-  function registerDocumentEventHandler(type, handler) {
-    return component.rootNode.addEventListener(type, handler);
+  function registerDocumentClickHandler(handler) {
+    return document.addEventListener('click', handler);
   }
 
-  function deregisterDocumentEventHandler(type, handler) {
-    return component.rootNode.removeEventListener(type, handler);
+  function deregisterDocumentClickHandler(handler) {
+    return document.removeEventListener('click', handler);
+  }
+
+  function focusOnInput() {
+    component.inputNode.focus();
   }
 
   function isInputFocused() {
-    return document.activeElement === component.rootNode;
+    return document.activeElement === component.inputNode;
   }
 
-  function matchExists() {}
+  function matchExists(originalValue) {
+    // We are going to lowercase our value for easier comparisons
+    const value = originalValue.toLowerCase();
+
+    for (let i = 0; i < component.props.options.length; i++) {
+      // Get a lowercase version of the current option text
+      const text = component.props.options[i].text.toLowerCase();
+
+      if (text.indexOf(value) !== -1) {
+        return true;
+      }
+    }
+
+    return false;
+  }
 
   function focusOnElementAtIndex(index) {
     return component.optionNodes[index].focus();
@@ -70,33 +84,32 @@ function datalistAdapter(component) {
   }
 
   function getNumberOfItems() {
-    return;
+    return component.optionNodes.length;
   }
 
-  function selectItemAtIndex() {}
+  function selectItemAtIndex(index) {
+    const text = component.optionObjects[index].text;
 
-  function notifyCancel() {
-    const event = new CustomEvent('MDCSimpleMenu:cancel');
-    component.rootNode.dispatchEvent(event);
-
-    // This is a little hackish, but we're going to call our onCancel func too
-    if (component.props.onCancel) {
-      component.props.onCancel();
-    }
+    component.setState({ value: text }, () => {
+      // eslint-disable-next-line
+      component.inputNode.value = text;
+    });
   }
+
+  function notifyCancel() {}
 
   return {
     addClass,
     removeClass,
-    hasClass,
     registerInputEventHandler,
     deregisterInputEventHandler,
-    registerBtnEventHandler,
-    deregisterBtnEventHandler,
+    registerBtnClickHandler,
+    deregisterBtnClickHandler,
     registerInteractionEventHandler,
     deregisterInteractionEventHandler,
-    registerDocumentEventHandler,
-    deregisterDocumentEventHandler,
+    registerDocumentClickHandler,
+    deregisterDocumentClickHandler,
+    focusOnInput,
     isInputFocused,
     matchExists,
     focusOnElementAtIndex,
