@@ -1,7 +1,7 @@
 import React from 'react';
 import { storiesOf, action } from '@kadira/storybook';
 
-import Datalist from '../components/Datalist';
+import DatalistExample from './DatalistExample';
 import Select from '../components/Select';
 
 const options = [
@@ -32,5 +32,12 @@ storiesOf('Select', module)
 
 storiesOf('Datalist', module)
   .add('default', () => (
-    <Datalist {...props} />
+    <DatalistExample
+      options={[
+        { id: 'apple', text: 'Apple', value: 'apple' },
+        { id: 'orange', text: 'Orange', value: 'orange' },
+        { id: 'strawberry', text: 'Strawberry', value: 'strawberry' },
+        { id: 'grape', text: 'Grape', value: 'grape' },
+      ]}
+    />
   ));
