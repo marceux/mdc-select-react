@@ -28,10 +28,10 @@ describe('<Select />', () => {
 
   beforeEach(() => {
     options = [
-      { id: 'apple', label: 'Apple', value: 'apple' },
-      { id: 'orange', label: 'Orange', value: 'orange' },
-      { id: 'strawberry', label: 'Strawberry', value: 'strawberry' },
-      { id: 'grape', label: 'Grape', value: 'grape' },
+      { id: 'apple', text: 'Apple', value: 'apple' },
+      { id: 'orange', text: 'Orange', value: 'orange' },
+      { id: 'strawberry', text: 'Strawberry', value: 'strawberry' },
+      { id: 'grape', text: 'Grape', value: 'grape' },
     ];
 
     onBlur = sinon.spy();
@@ -139,7 +139,7 @@ describe('<Select />', () => {
   it('uses the default text or placeholder if value and label not provided', () => {
     // Added empty option to the beginning
     options = [
-      { id: '', label: '', value: '' },
+      { id: '', text: '', value: '' },
       ...options,
     ];
 
