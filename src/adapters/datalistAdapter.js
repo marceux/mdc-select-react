@@ -19,22 +19,6 @@ function datalistAdapter(component) {
     component.rootNode.classList.remove(className);
   }
 
-  function registerInputEventHandler(type, handler) {
-    return component.inputNode.addEventListener(type, handler);
-  }
-
-  function deregisterInputEventHandler(type, handler) {
-    return component.inputNode.removeEventListener(type, handler);
-  }
-
-  function registerBtnClickHandler(handler) {
-    return component.btnNode.addEventListener('click', handler);
-  }
-
-  function deregisterBtnClickHandler(handler) {
-    return component.btnNode.removeEventListener('click', handler);
-  }
-
   function registerInteractionEventHandler(type, handler) {
     return component.listNode.addEventListener(type, handler);
   }
@@ -51,32 +35,17 @@ function datalistAdapter(component) {
     return document.removeEventListener('click', handler);
   }
 
-  function focusOnInput() {
-    component.inputNode.focus();
+  function storeFocus() {
+    // eslint-disable-next-line
+    component.previousFocus = document.activeElement;
   }
 
-  function isInputFocused() {
-    return document.activeElement === component.inputNode;
-  }
-
-  function matchExists(originalValue) {
-    // We are going to lowercase our value for easier comparisons
-    const value = originalValue.toLowerCase();
-
-    for (let i = 0; i < component.props.options.length; i++) {
-      // Get a lowercase version of the current option text
-      const text = component.props.options[i].text.toLowerCase();
-
-      if (text.indexOf(value) !== -1) {
-        return true;
-      }
-    }
-
-    return false;
+  function restoreFocus() {
+    component.previousFocus.focus();
   }
 
   function focusOnElementAtIndex(index) {
-    return component.optionNodes[index].focus();
+    component.optionNodes[index].focus();
   }
 
   function getIndexForEventTarget(target) {
@@ -88,30 +57,22 @@ function datalistAdapter(component) {
   }
 
   function selectItemAtIndex(index) {
-    const text = component.optionObjects[index].text;
-
-    component.setState({ value: text }, () => {
-      // eslint-disable-next-line
-      component.inputNode.value = text;
-    });
+    return component.props.onSelect(index);
   }
 
-  function notifyCancel() {}
+  function notifyCancel() {
+    return component.props.onCancel();
+  }
 
   return {
     addClass,
     removeClass,
-    registerInputEventHandler,
-    deregisterInputEventHandler,
-    registerBtnClickHandler,
-    deregisterBtnClickHandler,
     registerInteractionEventHandler,
     deregisterInteractionEventHandler,
     registerDocumentClickHandler,
     deregisterDocumentClickHandler,
-    focusOnInput,
-    isInputFocused,
-    matchExists,
+    storeFocus,
+    restoreFocus,
     focusOnElementAtIndex,
     getIndexForEventTarget,
     getNumberOfItems,
